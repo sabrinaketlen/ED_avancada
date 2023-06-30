@@ -4,6 +4,11 @@
 #include "ListGraph.h"
 
 using namespace std;
+
+/**
+* funcao criada somente para ler o arquivo que sera utilizado na questao 1.
+* funcao ainda fantasma, pois nao insere no grafico ja que a funcao insert ainda esta sendo feita
+**/
 void questao_um(){
 
     fstream file;
