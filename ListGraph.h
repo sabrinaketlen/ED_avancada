@@ -61,26 +61,26 @@ public:
      * @param edge A nova aresta
      */
     void insert(const Edge<T,K>& edge){
-        bool s = false;
-        bool d = false;
+        bool existe_o_source = false;
+        bool existe_o_dest = false;
 
         Edge<int,double> novo(edge.get_dest(), edge.get_source());
 
-        int source;
-        int dest;
+        int indice_do_source;
+        int indice_do_dest;
 
         for(int i = 0; i < _adj.size(); i++){
             if(edge.get_source() == _adj[i].begin().get_source()){
-                s = true;
-                source = i;
+                existe_o_source = true;
+                indice_do_source = i;
                 break;
             }
         }
 
         for(int i = 0; i < _adj.size(); i++){
             if(edge.get_dest() == _adj[i].begin().get_dest()){
-                d = true;
-                dest = i;
+                existe_o_dest = true;
+                indice_do_dest = i;
                 break;
             }
         }
@@ -133,8 +133,38 @@ public:
      * @param source O vertice origem
      * @return Uma const reference para a lista de adjacencias de um vertice
     */
-    //list<Edge<T,K>>& neighbors(T source);
-    //const list<Edge<T,K>>& neighbors(T source) const;
+    list<Edge<T,K>>& neighbors(T source){
+        bool existe_o_source = false;
+        int indice_do_source;
+        for(int i = 0; i < _adj.size(); i++){
+            if(source == _adj[i].begin().get_source()){
+                existe = true;
+                indice = i;
+            }
+        }
+        if(existe){
+            return _adj[i];
+        }
+        else{
+            return list<Edge<T, K>> lista_vazia;
+        }
+    }
+    const list<Edge<T,K>>& neighbors(T source) const{
+        bool existe_o_source = false;
+        int indice_do_source;
+        for(int i = 0; i < _adj.size(); i++){
+            if(source == _adj[i].begin().get_source()){
+                existe = true;
+                indice = i;
+            }
+        }
+        if(existe){
+            return _adj[i];
+        }
+        else{
+            return list<Edge<T, K>> lista_vazia;
+        }
+    }
 
     /** 
      * Retorna um iterator para a primeira aresta adjacent ao vertice especificado.

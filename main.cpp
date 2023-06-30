@@ -2,8 +2,40 @@
 #include <fstream>
 #include "Edge.h"
 #include "ListGraph.h"
-#include "files.h"
 using namespace std;
+
+/**
+* funcao criada somente para ler o arquivo que sera utilizado na questao 1.
+* funcao ainda fantasma, pois nao insere no grafico ja que a funcao insert ainda esta sendo feita
+**/
+void questao_um(){
+
+    fstream file;
+    file.open("grafo.txt");
+    int vertices;
+    int arestas;
+
+    while (file>>vertices){
+        
+        file >> arestas;
+
+        //ListGraph<int,double> grafo(vertices,false);
+
+        int contador = 0;
+        list<Edge<int,double>> _arestas;
+
+        for(int i = 0; i < arestas; i++){
+            int s;
+            int d;
+            file >> s ;
+            file >> d ;
+            Edge<int,double> novo(s,d);
+            _arestas.push_back(novo);
+        }
+    }
+    
+    file.close();
+}
 
 int main() {
     questao_um();
