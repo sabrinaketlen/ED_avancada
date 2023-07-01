@@ -39,6 +39,31 @@ void questao_um(){
 
 int main() {
     questao_um();
+    
+    list<Edge<int, double>> teste; //criei uma lista teste vazia
+    
+    Edge<int, double> a(1, 2); //edge com saída do 1 e destino 2
+    
+    teste.push_back(a); //coloquei na lista
+
+    ListGraph<int, double> grafoTeste (3, false); //criei um grafo com 3 vertices
+    
+    grafoTeste.insert(a); //coloquei o edge no grafo
+
+    if(grafoTeste.is_edge(2, 2)){ //teste do isEdge com um edge que não foi inserido
+        cout << "Verdade" << endl;
+    }
+    else{
+        cout << "Falso" << endl;
+    }
+
+    if(grafoTeste.is_edge(1, 2)){ //teste do isEdge com um edge que foi inserido.
+        cout << "Verdade" << endl;
+    }
+    else{
+        cout << "Falso" << endl;
+    }
+    
 }
 
 /*

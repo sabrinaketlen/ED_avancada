@@ -70,46 +70,34 @@ public:
         int indice_do_dest;
 
         for(int i = 0; i < _adj.size(); i++){
-            if(edge.get_source() == _adj[i].begin().get_source()){
+            indice_do_source = i;
+            if(edge.get_source() == _adj[i].begin()->get_source()){
                 existe_o_source = true;
-                indice_do_source = i;
+                _adj[i].push_back(edge);
                 break;
             }
         }
 
         for(int i = 0; i < _adj.size(); i++){
-            if(edge.get_dest() == _adj[i].begin().get_dest()){
+            indice_do_dest = i;
+            if(edge.get_dest() == _adj[i].begin()->get_dest()){
                 existe_o_dest = true;
-                indice_do_dest = i;
+                _adj[i].push_back(edge);
                 break;
             }
         }
 
-        if(s == false){
-            _adj.resize(_adj.size()+1);
-            //pushback de vetor e pushback do edge na lista na nova posicao do vetor
-            // edge
-
-        }
-        else{
-            //fazer busca se edge ja existe em adj[source] ja existe
-                //se nao
-                    //adj[source].pushback(edge);
+        if(existe_o_source == false){
+            list<Edge<T,K>> aux;
+            aux.push_back(edge);
+            _adj.push_back(aux);
         }
 
-        if(d == false){
-            _adj.resize(_adj.size()+1);
-            //pushback de vetor e pushback do edge na lista na nova posicao do vetor
-            // novo
-        }
-        else{
-            //fazer busca se aresta ja existe
-                // se nao
-                    //adj[dest].pushback(novo); 
-        }
-
-        
-        
+        if(existe_o_dest == false){
+            list<Edge<T,K>> aux;
+            aux.push_back(novo);
+            _adj.push_back(aux);
+        }        
     }
 
     /**
@@ -118,7 +106,23 @@ public:
      * @param dext O vertice de destino
      * @return true se existe uma aresta de source para dest
     */
-    //bool is_edge(T source, T dest) const;
+    bool is_edge(T source, T dest) const{
+        int indice = 0;
+        for (int i = 0; i < _adj.size(); i++){
+            indice = i;
+            if(_adj[i].begin()->get_source() == source){
+                break;
+            }
+        }
+
+        for (auto it = _adj[indice].begin(); it != _adj[indice].end(); it++){
+            if((*it).get_source() == source && (*it).get_dest() == dest && (*it).get_weight() != numeric_limits<K>::infinity()){
+                return true;
+            }
+        }
+        return false;
+        
+    }
 
     /** Obtem a aresta entre dois vertices
      * @param source O vertice origem
@@ -138,15 +142,15 @@ public:
         int indice_do_source;
         for(int i = 0; i < _adj.size(); i++){
             if(source == _adj[i].begin().get_source()){
-                existe = true;
-                indice = i;
+                existe_o_source = true;
+                indice_do_source = i;
             }
         }
-        if(existe){
-            return _adj[i];
+        if(existe_o_source){
+            return _adj[indice_do_source];
         }
         else{
-            return list<Edge<T, K>> lista_vazia;
+            return list<Edge<T, K>>(); //forma correta de retornar uma lista vazia
         }
     }
     const list<Edge<T,K>>& neighbors(T source) const{
@@ -154,15 +158,15 @@ public:
         int indice_do_source;
         for(int i = 0; i < _adj.size(); i++){
             if(source == _adj[i].begin().get_source()){
-                existe = true;
-                indice = i;
+                existe_o_source = true;
+                indice_do_source = i;
             }
         }
-        if(existe){
-            return _adj[i];
+        if(existe_o_source){
+            return _adj[indice_do_source];
         }
         else{
-            return list<Edge<T, K>> lista_vazia;
+            return list<Edge<T, K>>(); //forma correta de retornar uma lista vazia
         }
     }
 
