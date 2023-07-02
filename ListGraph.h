@@ -73,7 +73,7 @@ public:
         bool existe_o_dest = false;
         int inseriu = 0;
 
-        Edge<int,double> novo(edge.get_dest(), edge.get_source());
+        Edge<T,K> novo(edge.get_dest(), edge.get_source(), edge.get_weight());
 
         int indice_do_source;
         int indice_do_dest;
@@ -287,7 +287,7 @@ public:
 
                 // executa a busca em profundidade recursivamente para o vizinho
                 // se retornar falso, nao eh bipartido
-                if (!bipartido_DFS(indice_do_vizinho, cores, visitado)) {
+                if (!bipartido_DFS(indice_do_vizinho, cores, visitado)){
                     return false;  
                 }
             // se dois vertices vizinhos possuem a mesma cor, nao eh bipartido
