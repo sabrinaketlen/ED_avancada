@@ -236,23 +236,22 @@ public:
         int quantos_vertices = this->_num_v;
         
         // inicialmente, todos os verticoes recebem cor 'n' (nenhuma)
-        vector<char> cores;
-        cores.reserve(quantos_vertices);
-        for(int i = 0; i < quantos_vertices; i++){
-            cores[i] = 'n';  
-        }
-
         //alem disso, todos os vertices sao sinalizados como nao visitados
+        vector<char> cores;
         vector<bool> visitado;
+
+        cores.reserve(quantos_vertices);
         visitado.reserve(quantos_vertices);
+
         for(int i = 0; i < quantos_vertices; i++){
+            cores[i] = 'n';
             visitado[i] = false;  
         }
 
         // a partir do vertice inicial, eh feita uma busca em profundide de forma recursiva para verificar se a coloracao com 2 cores eh 
-        //possivel
+        //possivel. o if eh utilizado como medida de seguranca.
         if (!visitado[v]) {
-            cores[v] = 'v';  // define a cor do vertice inicial como 'v' (vermelho), para que seus vizinhos possam ser coloridos corretamente
+            cores[v] = 'R';  // define a cor do vertice inicial como 'R', para que seus vizinhos possam ser coloridos corretamente
             if (!bipartido_DFS(v, cores, visitado)) {
                 return false;
             }
@@ -277,12 +276,13 @@ public:
         // itera os vizinhos para definir as cores dos que ainda nao tiveram suas cores definidas (ou seja, ainda nao foram visitados)
         for (auto it = vizinhos.begin(); it != vizinhos.end(); it++) {
             int indice_do_vizinho = (*it).get_dest();
+            //se ainda nao foi visitado, entao visite
             if (!visitado[indice_do_vizinho]) {
                 // Define a cor do vizinho com base na cor do vértice atual
-                if (cores[v] == 'v') {
-                    cores[indice_do_vizinho] = 'a';
+                if (cores[v] == 'R') {
+                    cores[indice_do_vizinho] = 'B';
                 } else {
-                    cores[indice_do_vizinho] = 'v';
+                    cores[indice_do_vizinho] = 'R';
                 }
 
                 // executa a busca em profundidade recursivamente para o vizinho
@@ -290,7 +290,8 @@ public:
                 if (!bipartido_DFS(indice_do_vizinho, cores, visitado)){
                     return false;  
                 }
-            // se dois vertices vizinhos possuem a mesma cor, nao eh bipartido
+            // se ja foi visitado, analise se esse vertice e seus vizinhos tem a mesma cor
+            // se sim, nao eh bipartido
             } else if (cores[indice_do_vizinho] == cores[v]) {
                 return false;  
             }

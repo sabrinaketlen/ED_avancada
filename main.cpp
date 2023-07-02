@@ -4,14 +4,14 @@
 #include "ListGraph.h"
 using namespace std;
 
-/**
-* funcao criada somente para ler o arquivo que sera utilizado na questao 1.
-* 
+/** Questao Um
+* funcao criada para ler o arquivo que sera utilizado na questao 1.
+* tambem responde a questao um, printando true ou false de acordo com o teste feito em cada grafo lido
 **/
 void questao_um(){
 
     fstream file;
-    file.open("grafo.txt");
+    file.open("qum.txt");
     int vertices;
     int arestas;
 
@@ -32,12 +32,14 @@ void questao_um(){
             grafo.insert(novo);
         }
 
-        bool eh = grafo.bipartido();
-        cout << eh;
-        // testa se eh bipartido
+        if(grafo.bipartido()){
+            cout << "SIM" << endl;
+        }
+        else{
+            cout << "NAO" << endl;
+        }
        
     }
-    
     file.close();
 }
 
