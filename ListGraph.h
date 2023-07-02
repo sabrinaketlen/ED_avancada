@@ -20,7 +20,7 @@ template<typename T, typename K>
 class ListGraph {
 private:
     int _num_v;               // numero de vertices
-    int _num_e;               // numero de arestas
+    int _num_e {0};               // numero de arestas
     bool _directed;          // flag para indicar se eh direcionado
     vector<list<Edge<T, K>>> _adj;  // listas de adjacencias
 
@@ -40,15 +40,23 @@ public:
 
     /**
      * Retorna o numero de vertices
-     * @param O numero de vertices
+     * @return O numero de vertices
      */
     int get_num_v() const { return _num_v; }
 
     /**
      * Retorna o numero de arestas
-     * @param O numero de arestas
+     * @return O numero de arestas
      */
     int get_num_e() const { return _num_e; }
+
+    /**
+     * Retorna as adjacencias do grafo
+     * @return O vector contendo as adjacencias
+     */
+    vector<list<Edge<T, K>>>& get_adj() const { // criei por conveniencia, achei que fosse usar, mas deixei ai
+        return _adj;
+    }
 
     /**
      * Determina se esse eh um grafo direcionado
@@ -63,6 +71,7 @@ public:
     void insert(const Edge<T,K>& edge){
         bool existe_o_source = false;
         bool existe_o_dest = false;
+        int inseriu = 0;
 
         Edge<int,double> novo(edge.get_dest(), edge.get_source());
 
@@ -73,16 +82,22 @@ public:
             indice_do_source = i;
             if(edge.get_source() == _adj[i].begin()->get_source()){
                 existe_o_source = true;
-                _adj[i].push_back(edge);
+                if(!is_edge(edge.get_source(),edge.get_dest())){
+                    _adj[i].push_back(edge);
+                    inseriu++;
+                }
                 break;
             }
         }
 
         for(int i = 0; i < _adj.size(); i++){
             indice_do_dest = i;
-            if(edge.get_dest() == _adj[i].begin()->get_dest()){
+            if(edge.get_dest() == _adj[i].begin()->get_source()){
                 existe_o_dest = true;
-                _adj[i].push_back(edge);
+                if(!is_edge(novo.get_source(),novo.get_dest())){
+                _adj[i].push_back(novo);
+                inseriu++;
+                }
                 break;
             }
         }
@@ -91,12 +106,17 @@ public:
             list<Edge<T,K>> aux;
             aux.push_back(edge);
             _adj.push_back(aux);
+            inseriu++;
         }
 
         if(existe_o_dest == false){
             list<Edge<T,K>> aux;
             aux.push_back(novo);
             _adj.push_back(aux);
+            inseriu++;
+        }
+        if(inseriu != 0){
+            this->_num_e++;
         }        
     }
 
@@ -138,37 +158,41 @@ public:
      * @return Uma const reference para a lista de adjacencias de um vertice
     */
     list<Edge<T,K>>& neighbors(T source){
-        bool existe_o_source = false;
         int indice_do_source;
         for(int i = 0; i < _adj.size(); i++){
-            if(source == _adj[i].begin().get_source()){
-                existe_o_source = true;
+            if(source == _adj[i].begin()->get_source()){
                 indice_do_source = i;
             }
         }
-        if(existe_o_source){
-            return _adj[indice_do_source];
-        }
-        else{
-            return list<Edge<T, K>>(); //forma correta de retornar uma lista vazia
-        }
+        
+        return _adj[indice_do_source];
     }
+
     const list<Edge<T,K>>& neighbors(T source) const{
-        bool existe_o_source = false;
         int indice_do_source;
         for(int i = 0; i < _adj.size(); i++){
-            if(source == _adj[i].begin().get_source()){
-                existe_o_source = true;
+            if(source == _adj[i].begin()->get_source()){
                 indice_do_source = i;
             }
         }
-        if(existe_o_source){
-            return _adj[indice_do_source];
-        }
-        else{
-            return list<Edge<T, K>>(); //forma correta de retornar uma lista vazia
-        }
+        return _adj[indice_do_source];
     }
+
+    /*
+    ListGraph<T, K>& operator=(const ListGraph<T, K>& other) { // possivel clone nao finalizado
+        if (this == &other) {
+            return *this;
+        }
+
+        this -> _num_v = other._num_v;
+        this -> _num_e = other._num_e;
+        this -> _directed = other._directed;
+
+        
+
+        return *this;
+    }
+    */
 
     /** 
      * Retorna um iterator para a primeira aresta adjacent ao vertice especificado.
@@ -189,7 +213,91 @@ public:
     //ListGraph(const ListGraph&) = delete;
     //ListGraph& operator=(const ListGraph&) = delete;
 
+
+
+    /** Funcao que verifica se um grafo eh bipartido, o que infere que ele pode ter uma coloracao de exatamente duas cores
+     * nao recebe nada como parametro pois usa atributos e funcoes da propria classe
+     * @return False caso nao seja bipartido
+     * @return True caso nao seja bipartido
+    */
+    bool bipartido() {
+        // caso seja um grafo nulo (com 0 arestas) e com mais de 2 vertices, eh possivel colorir esses vertices com duas cores, ja que
+        // nao tem como vizinhos terem a mesma cor por nao existirem vizinhos
+        if((this->_num_e == 0) && (this->_num_v >=2)){
+            return true;
+        }
+        else if(this->_num_v < 2){
+            return false;
+        }
+
+        //define o vertice inicial
+        int v = _adj[0].begin()->get_source();
+        // reservo o tamanho exato dos vetores cores e visitado com a quantidade de vertices
+        int quantos_vertices = this->_num_v;
+        
+        // inicialmente, todos os verticoes recebem cor 'n' (nenhuma)
+        vector<char> cores;
+        cores.reserve(quantos_vertices);
+        for(int i = 0; i < quantos_vertices; i++){
+            cores[i] = 'n';  
+        }
+
+        //alem disso, todos os vertices sao sinalizados como nao visitados
+        vector<bool> visitado;
+        visitado.reserve(quantos_vertices);
+        for(int i = 0; i < quantos_vertices; i++){
+            visitado[i] = false;  
+        }
+
+        // a partir do vertice inicial, eh feita uma busca em profundide de forma recursiva para verificar se a coloracao com 2 cores eh 
+        //possivel
+        if (!visitado[v]) {
+            cores[v] = 'v';  // define a cor do vertice inicial como 'v' (vermelho), para que seus vizinhos possam ser coloridos corretamente
+            if (!bipartido_DFS(v, cores, visitado)) {
+                return false;
+            }
+        }
+        // se a busca em profundidade nao retornou false, o grafo eh bipartido
+        return true;
+    }
+
+    /** Funcao necessaria para classificar um grafo como bipartido ou nao
+     * @param v O vertice a ter suas arestas analisadas
+     * @param cores uma referencia para o vector que contem a definicao das cores dos vertices de acordo com os indices
+     * @param visitado uma referencia para o vector que sinaliza se tal vertice ja foi visitado
+     * @return true caso a coloracao seja aceitavel, e false caso nao
+    */
+    bool bipartido_DFS(int v, vector<char>& cores, vector<bool>& visitado) {
+        // sinaliza o vertice recebido como resultado
+        visitado[v] = true;  
+
+        // obtem as arestas em que esse vertice faz parte como sources
+        list<Edge<T, K>>& vizinhos = neighbors(v);
+
+        // itera os vizinhos para definir as cores dos que ainda nao tiveram suas cores definidas (ou seja, ainda nao foram visitados)
+        for (auto it = vizinhos.begin(); it != vizinhos.end(); it++) {
+            int indice_do_vizinho = (*it).get_dest();
+            if (!visitado[indice_do_vizinho]) {
+                // Define a cor do vizinho com base na cor do vértice atual
+                if (cores[v] == 'v') {
+                    cores[indice_do_vizinho] = 'a';
+                } else {
+                    cores[indice_do_vizinho] = 'v';
+                }
+
+                // executa a busca em profundidade recursivamente para o vizinho
+                // se retornar falso, nao eh bipartido
+                if (!bipartido_DFS(indice_do_vizinho, cores, visitado)) {
+                    return false;  
+                }
+            // se dois vertices vizinhos possuem a mesma cor, nao eh bipartido
+            } else if (cores[indice_do_vizinho] == cores[v]) {
+                return false;  
+            }
+        }
+        return true;  // se nao houver nenhum retorno de false, significa que eh bipartido e retorna true
+    }
+
 };
-
-
 #endif
+

@@ -6,7 +6,7 @@ using namespace std;
 
 /**
 * funcao criada somente para ler o arquivo que sera utilizado na questao 1.
-* funcao ainda fantasma, pois nao insere no grafico ja que a funcao insert ainda esta sendo feita
+* 
 **/
 void questao_um(){
 
@@ -18,11 +18,10 @@ void questao_um(){
     while (file>>vertices){
         
         file >> arestas;
-
-        //ListGraph<int,double> grafo(vertices,false);
-
         int contador = 0;
-        list<Edge<int,double>> _arestas;
+        int vertice_inicial;
+
+        ListGraph<int,double> grafo(vertices,false);
 
         for(int i = 0; i < arestas; i++){
             int s;
@@ -30,16 +29,23 @@ void questao_um(){
             file >> s ;
             file >> d ;
             Edge<int,double> novo(s,d);
-            _arestas.push_back(novo);
+            grafo.insert(novo);
         }
+
+        bool eh = grafo.bipartido();
+        cout << eh;
+        // testa se eh bipartido
+       
     }
     
     file.close();
 }
 
 int main() {
-    questao_um();
     
+    questao_um();
+
+    /*
     list<Edge<int, double>> teste; //criei uma lista teste vazia
     
     Edge<int, double> a(1, 2); //edge com saída do 1 e destino 2
@@ -63,6 +69,7 @@ int main() {
     else{
         cout << "Falso" << endl;
     }
+    */
     
 }
 
