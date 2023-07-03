@@ -4,10 +4,15 @@
 #include <list>
 #include <vector>
 #include <limits>
+#include <queue>
+#include <map>
+#include <string>
 #include "Edge.h"
 using std::list;
 using std::vector;
 using std::numeric_limits;
+using std::queue;
+using std::map;
 
 /**
  * Classe que especifica um TAD ListGraph que implementa um 
@@ -54,7 +59,7 @@ public:
      * Retorna as adjacencias do grafo
      * @return O vector contendo as adjacencias
      */
-    vector<list<Edge<T, K>>>& get_adj() const { // criei por conveniencia, achei que fosse usar, mas deixei ai
+    vector<list<Edge<T, K>>> get_adj() const { // criei por conveniencia, achei que fosse usar, mas deixei ai
         return _adj;
     }
 
@@ -73,7 +78,7 @@ public:
         bool existe_o_dest = false;
         int inseriu = 0;
 
-        Edge<T,K> novo(edge.get_dest(), edge.get_source(), edge.get_weight());
+        Edge<T, K> novo(edge.get_dest(), edge.get_source(), edge.get_weight());
 
         int indice_do_source;
         int indice_do_dest;
@@ -236,22 +241,23 @@ public:
         int quantos_vertices = this->_num_v;
         
         // inicialmente, todos os verticoes recebem cor 'n' (nenhuma)
-        //alem disso, todos os vertices sao sinalizados como nao visitados
         vector<char> cores;
-        vector<bool> visitado;
-
         cores.reserve(quantos_vertices);
-        visitado.reserve(quantos_vertices);
-
         for(int i = 0; i < quantos_vertices; i++){
-            cores[i] = 'n';
+            cores[i] = 'n';  
+        }
+
+        //alem disso, todos os vertices sao sinalizados como nao visitados
+        vector<bool> visitado;
+        visitado.reserve(quantos_vertices);
+        for(int i = 0; i < quantos_vertices; i++){
             visitado[i] = false;  
         }
 
         // a partir do vertice inicial, eh feita uma busca em profundide de forma recursiva para verificar se a coloracao com 2 cores eh 
-        //possivel. o if eh utilizado como medida de seguranca.
+        //possivel
         if (!visitado[v]) {
-            cores[v] = 'R';  // define a cor do vertice inicial como 'R', para que seus vizinhos possam ser coloridos corretamente
+            cores[v] = 'v';  // define a cor do vertice inicial como 'v' (vermelho), para que seus vizinhos possam ser coloridos corretamente
             if (!bipartido_DFS(v, cores, visitado)) {
                 return false;
             }
@@ -276,27 +282,90 @@ public:
         // itera os vizinhos para definir as cores dos que ainda nao tiveram suas cores definidas (ou seja, ainda nao foram visitados)
         for (auto it = vizinhos.begin(); it != vizinhos.end(); it++) {
             int indice_do_vizinho = (*it).get_dest();
-            //se ainda nao foi visitado, entao visite
             if (!visitado[indice_do_vizinho]) {
                 // Define a cor do vizinho com base na cor do vértice atual
-                if (cores[v] == 'R') {
-                    cores[indice_do_vizinho] = 'B';
+                if (cores[v] == 'v') {
+                    cores[indice_do_vizinho] = 'a';
                 } else {
-                    cores[indice_do_vizinho] = 'R';
+                    cores[indice_do_vizinho] = 'v';
                 }
 
                 // executa a busca em profundidade recursivamente para o vizinho
                 // se retornar falso, nao eh bipartido
-                if (!bipartido_DFS(indice_do_vizinho, cores, visitado)){
+                if (!bipartido_DFS(indice_do_vizinho, cores, visitado)) {
                     return false;  
                 }
-            // se ja foi visitado, analise se esse vertice e seus vizinhos tem a mesma cor
-            // se sim, nao eh bipartido
+            // se dois vertices vizinhos possuem a mesma cor, nao eh bipartido
             } else if (cores[indice_do_vizinho] == cores[v]) {
                 return false;  
             }
         }
         return true;  // se nao houver nenhum retorno de false, significa que eh bipartido e retorna true
+    }
+
+
+    /** Funcao que faz busca em largura em um grafo com vertices em string e retorna o menor caminho entre os dois vértices dados.
+     * 
+     * @param G um grafo do tipo lista de adjacência
+     * @param s vertice inicial
+     * @param t vértice final
+     * @return distância do caminho de S até T.
+    */
+    int BFS(ListGraph G, std::string s, std::string t){
+        
+        //utilizo a estrutura de dados map para mapear com int os valores em string do grafo dado
+        map<T, int> m;
+        int n = 0;
+        for(auto &lista : G._adj){
+            for(auto &a : lista){
+                if(m.count(a.get_source()) == 0){
+                    m[a.get_source()] = n;
+                    n++;
+                }
+                
+            }
+        }
+        int dist[n];
+        int num[n];
+
+        //inicio o vetor de distancia com infinito e o vetor de numeros visitados com -1
+        //o -1 irá representar aqueles que não foram visitados ainda.
+        for (int i = 0; i < n; i++){
+            dist[i] = numeric_limits<double>::infinity();
+            num[i] = -1;
+        }
+
+        int contador = 0;
+        //crio uma fila para poder ir olhando os vizinhos do vértice informado e os vizinhos dos vizinhos.
+        queue<int> fila;
+
+        //como utilizei o map, na que eu for representar o indice do vetor, preciso utilizar m[s] para que assim ele retorne o int correspondente e assim coloque no vetor num e dist.
+        num[m[s]] = contador;
+        dist[m[s]] = 0;
+
+        //mesma coisa no push
+        fila.push(m[s]);
+
+        contador++;
+        
+        //aqui começa a real busca em largura, em toda repetição do laço, checo se o i é igual ao map de t, caso seja, eu já posso retornar o valor que está em dist[i]. Caso não, eu faço um for com iterador percorrendo todos os indices da lista[i] do grafo informado e checo somente os vértices destino também utilizando o map. Caso no vetor de num esteja com -1, quer dizer que ainda não foi visitado. então eu marco ele com o contador para marcar que ele foi visitado, aumento a distancia dele em dist[i]+1 e coloco ele na pilha. Faço isso até achar o T. Caso não ache, retorno infinito.
+        while(!fila.empty()){
+            int i = fila.front();
+            fila.pop();
+
+            if(i == m[t]){
+                return dist[i];
+            }
+            for(Edge<T, K> j: G._adj[i]){
+                if(num[m[j.get_dest()]] == -1){
+                    num[m[j.get_dest()]] = contador;
+                    dist[m[j.get_dest()]] = dist[i] + 1;
+                    fila.push(m[j.get_dest()]);
+                }
+            }
+        }
+        
+        return numeric_limits<int>::infinity();
     }
 
 };

@@ -18,6 +18,7 @@ public:
     Edge(T source, T dest, K w = 1.0){
         this->_source = source;
         this->_dest = dest;
+        this->_weight = w;
     }
 
     // Constroi uma aresta falsa com source e dest igual a -1 e 
