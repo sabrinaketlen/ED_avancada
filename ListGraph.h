@@ -331,7 +331,7 @@ public:
         //inicio o vetor de distancia com infinito e o vetor de numeros visitados com -1
         //o -1 irá representar aqueles que não foram visitados ainda.
         for (int i = 0; i < n; i++){
-            dist[i] = numeric_limits<double>::infinity();
+            dist[i] = numeric_limits<int>::infinity();
             num[i] = -1;
         }
 
