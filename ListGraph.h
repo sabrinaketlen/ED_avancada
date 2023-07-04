@@ -7,12 +7,15 @@
 #include <queue>
 #include <map>
 #include <string>
+#include <algorithm>
+#include <set>
 #include "Edge.h"
 using std::list;
 using std::vector;
 using std::numeric_limits;
 using std::queue;
 using std::map;
+using std::set;
 
 /**
  * Classe que especifica um TAD ListGraph que implementa um 
@@ -366,6 +369,32 @@ public:
         }
         
         return numeric_limits<int>::infinity();
+    }
+
+    int Search_bridge(int s, int p, vector<std::pair<int, int>>& pontes, int& time_s, vector<int>& num){
+
+        int menor = num[s] = time_s++;
+        int filhos = 0;
+        for (Edge<T, K> i : _adj[s]){
+            if(num[i.get_dest()] == 0){
+                filhos++;
+                int m = Search_bridge(i.get_dest(), s, pontes, time_s, num);
+                menor = std::min(menor, m);
+                if(num[s] < m){
+                    pontes.push_back(std::make_pair(s, i.get_dest()));
+                }
+            }
+            else if(i.get_dest() != p){
+                menor = std::min(menor, num[i.get_dest()]);
+            }
+        }
+        return menor;
+    }
+
+    vector<std::pair<int, int>> get_pontes(int& time_s, vector<int>& num){
+        vector<std::pair<int, int>> result;
+        Search_bridge(0, -1, result, time_s, num);
+        return result;
     }
 
 };

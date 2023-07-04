@@ -106,43 +106,58 @@ void questao_dois(){
     for(auto it = atoresTotais.begin(); it != atoresTotais.end(); it++){
         cout << "O numero de Bacon de " << (*it) << " eh " << grafo.BFS(grafo, (*it), "Kevin Bacon") <<" pelo filme " << retorna_filme(arestas, (*it)) << endl; 
     }
-    
-    
-    
+}
 
+void questao_tres(){
+    fstream file;
+    file.open("grafo2.txt");
+    int vertices;
+    int arestas;
+
+    while (file>>vertices){
+        
+        file >> arestas;
+        int contador = 0;
+        int vertice_inicial;
+
+        ListGraph<int,double> grafo(vertices,false);
+
+        for(int i = 0; i < arestas; i++){
+            int s;
+            int d;
+            file >> s ;
+            file >> d ;
+            Edge<int,double> novo(s,d);
+            grafo.insert(novo);
+        }
+
+        int time_s = 1;
+        vector<int> num;
+        num.resize(vertices);
+        for (int i = 0; i < num.size(); i++)
+        {
+            num[i] = 0;
+        }
+        
+        vector<pair<int, int>> auxiliar = grafo.get_pontes(time_s, num);
+        cout << "As pontes do grafo testado sao:" << endl;
+        for(auto bridge : auxiliar){
+            cout << bridge.first << " - " << bridge.second << endl;
+        }
+        
+       
+    }
     
+    file.close();
 }
 
 int main() {
     
     questao_um();
     questao_dois();
+    questao_tres();
 
-    /*
-    list<Edge<int, double>> teste; //criei uma lista teste vazia
     
-    Edge<int, double> a(1, 2); //edge com saída do 1 e destino 2
-    
-    teste.push_back(a); //coloquei na lista
-
-    ListGraph<int, double> grafoTeste (3, false); //criei um grafo com 3 vertices
-    
-    grafoTeste.insert(a); //coloquei o edge no grafo
-
-    if(grafoTeste.is_edge(2, 2)){ //teste do isEdge com um edge que não foi inserido
-        cout << "Verdade" << endl;
-    }
-    else{
-        cout << "Falso" << endl;
-    }
-
-    if(grafoTeste.is_edge(1, 2)){ //teste do isEdge com um edge que foi inserido.
-        cout << "Verdade" << endl;
-    }
-    else{
-        cout << "Falso" << endl;
-    }
-    */
     
 }
 
