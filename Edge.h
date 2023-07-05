@@ -26,7 +26,7 @@ public:
     Edge(){
         this->_source = -1;
         this->_dest = -1;
-        this->_weight = std::numeric_limits<K>::infinity(); //faz a aresta ter peso inifinito de acordo com o K tipo informado para o peso, eu acho.
+        this->_weight = std::numeric_limits<K>::infinity(); //faz a aresta ter peso inifinito de acordo com o K tipo informado para o peso.
     }
 
     // Constroi uma aresta que eh uma copia de outra

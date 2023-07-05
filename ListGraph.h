@@ -42,23 +42,25 @@ private:
     /**
      * Determina se uma aresta existe
      * @param source O vertice de origem
-     * @param dext O vertice de destino
+     * @param dest O vertice de destino
      * @return true se existe uma aresta de source para dest
     */
     bool is_edge(T source, T dest) const{
         int indice = 0;
+        //por ser um grafo generico que recebe qualquer tipo de source, primeiro preciso achar o indice do vector que ele está inserido.
         for (int i = 0; i < _adj.size(); i++){
             indice = i;
             if(_adj[i].begin()->get_source() == source){
                 break;
             }
         }
-
+        //vou no indice "i" que achei anteriormente e olho a lista inteira procurando um Edge que tenha os mesmos conteudos do informado. Caso tenha e o peso da sua aresta seja diferente de infinito, ele existe e eu posso retornar "true".
         for (auto it = _adj[indice].begin(); it != _adj[indice].end(); it++){
             if((*it).get_source() == source && (*it).get_dest() == dest && (*it).get_weight() != numeric_limits<K>::infinity()){
                 return true;
             }
         }
+        //se não achar, retorno falso.
         return false;
         
     }
@@ -129,10 +131,26 @@ private:
         return true;  // se nao houver nenhum retorno de false, significa que eh bipartido e retorna true
     }
 
+    /**
+     * funcao utilizada para a terceira questão, acha as pontes do grafo e colocar em um vector de pontes.
+     * @param s vértice de origem para fazer a busca em profundidade
+     * @param p vértice pai de "s".
+     * @param pontes para o vector que receberá as pontes da função
+     * @param time_s variável para guardar o tempo que o vértice foi achado
+     * @param num vector para guardar quais vértices já foram visitados e com o time_s
+     * @return menor tempo dos vértices visitados
+    */
     int Search_bridge(int s, int p, vector<std::pair<int, int>>& pontes, int& time_s, vector<int>& num){
 
+        //a cada chamada recursiva declaro a variável "menor" e marco o num[s] para que tenha time_s incrementado
         int menor = num[s] = time_s++;
         int filhos = 0;
+
+        //para todo vértice vizinho de S eu checo se já foi visitado, se não foi, incremento o número de filhos (por ser uma busca em profundidade), faço uma
+        //chamada recursiva para uma variável auxiliar "m". Após isso eu checo o valor minimo entre o "menor" e o "m" e faço o "menor" receber este valor. 
+        //se o tempo na casa [s] for menor que o m, quer dizer que é uma ponte, então eu já coloco no vector de pontes. Se o vizinho que eu estou checando for
+        //diferente do vértice P(pai de S), eu checo o minimo entre "menor" e a num[vizinho] e coloco na variável menor. Depois de checar todos os vizinhos eu
+        //retorno a variável "menor".
         for (Edge<T, K> i : _adj[s]){
             if(num[i.get_dest()] == 0){
                 filhos++;
@@ -355,6 +373,11 @@ public:
         return numeric_limits<int>::infinity();
     }
 
+    /** Funcao que retorna todas as pontes de um grafo
+     * @param time_s variável para guardar o tempo que o vértice foi achado
+     * @param num vector para guardar quais vértices já foram visitados
+     * @return vector com todas as pontes do grafo
+    */
     vector<std::pair<int, int>> get_pontes(int& time_s, vector<int>& num){
         vector<std::pair<int, int>> result;
         Search_bridge(0, -1, result, time_s, num);

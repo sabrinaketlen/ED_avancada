@@ -51,11 +51,12 @@ string retorna_filme(vector<Edge<string, string>>& vec, string ator){
     if(ator == "Kevin Bacon"){
         return "";
     }
-    for(int i = 0; i < vec.size(); i++){
-        if(vec[i].get_source() == ator){
+    else{
+        for(int i = 0; i < vec.size(); i++){
+            if(vec[i].get_source() == ator){
             return vec[i].get_weight();
+            }
         }
-        
     }
 }
 /**
