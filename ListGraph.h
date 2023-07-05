@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm>
 #include <set>
+#include <stack>
 #include "Edge.h"
 using std::list;
 using std::vector;
@@ -395,6 +396,60 @@ public:
         vector<std::pair<int, int>> result;
         Search_bridge(0, -1, result, time_s, num);
         return result;
+    }
+
+    void converte(vector<std::pair<int, int>> pontes) {
+        int qnt_vertices = this->_num_v;
+        
+        vector<std::pair<int, int>> direcoes;
+
+        for (int i = 0; i < qnt_vertices; i++) {
+
+            std::stack<int> pilha;
+            pilha.push(i);
+
+            while (!pilha.empty()) {
+                int v = pilha.top();
+                pilha.pop();
+
+                list<Edge<int, double>> vizinhos = this->neighbors(v);
+                 for(auto it = vizinhos.begin(); it!=vizinhos.end(); it++){
+                    std::pair<int,int> are((*it).get_source(),(*it).get_dest());
+                    std::pair<int,int> era((*it).get_dest(),(*it).get_source());
+
+                    bool eh_ponte = false;;
+                    for(int j = 0; j < pontes.size(); j++){
+                        if(pontes[j] == are){
+                            eh_ponte = true;
+
+                        }
+                    }
+
+                    bool ja_ta = false;
+                    for(int j = 0; j < direcoes.size(); j++){
+                        if(direcoes[j] == are || direcoes[j] == era){
+                            ja_ta = true;
+                        }
+                    }
+
+                    if(!ja_ta){
+                        if(eh_ponte){
+                            direcoes.push_back(are);
+                            direcoes.push_back(era);
+                        }
+                        else if(!eh_ponte){
+                            direcoes.push_back(are);
+                            pilha.push(are.second);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < direcoes.size(); i++) {
+            std::cout << direcoes[i].first << " " << direcoes[i].second << std::endl;
+        }
     }
 
 };

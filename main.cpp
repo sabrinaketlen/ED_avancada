@@ -32,8 +32,12 @@ void questao_um(){
             grafo.insert(novo);
         }
 
-        bool eh = grafo.bipartido();
-        cout << eh;
+        if(grafo.bipartido()){
+            cout << "SIM" << endl;
+        }
+        else{
+            cout << "NAO" << endl;
+        }
         // testa se eh bipartido
        
     }
@@ -140,6 +144,8 @@ void questao_tres(){
         }
         
         vector<pair<int, int>> auxiliar = grafo.get_pontes(time_s, num);
+
+        grafo.converte(auxiliar);
         cout << "As pontes do grafo testado sao:" << endl;
         for(auto bridge : auxiliar){
             cout << bridge.first << " - " << bridge.second << endl;
