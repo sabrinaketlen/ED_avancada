@@ -48,16 +48,14 @@ void questao_um(){
 
 //função para retornar o filme baseado na string informada, criei para me ajudar a printar os filmes padronizados com a ordenação
 string retorna_filme(vector<Edge<string, string>>& vec, string ator){
-    if(ator == "Kevin Bacon"){
-        return "";
-    }
-    else{
+    if(ator != "Kevin Bacon"){
         for(int i = 0; i < vec.size(); i++){
             if(vec[i].get_source() == ator){
             return vec[i].get_weight();
             }
         }
     }
+    return "";
 }
 /**
 * funcao criada para ler o arquivo da questão 2 e já printar o resultado padronizado com o output.txt
