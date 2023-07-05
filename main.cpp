@@ -5,21 +5,22 @@
 using namespace std;
 
 /**
-* funcao criada somente para ler o arquivo que sera utilizado na questao 1.
-* 
+* funcao criada somente para ler o arquivo que sera utilizado na questao.
+* printa o resultado de cada grafo lido, de acordo com o retorno da funcao publica "bipartido"
 **/
 void questao_um(){
 
     fstream file;
-    file.open("grafo.txt");
+    file.open("primeiraquestao.txt");
+    if(!file.is_open()){
+        cout << "Error: File Open" << endl;
+    }
     int vertices;
     int arestas;
 
     while (file>>vertices){
         
         file >> arestas;
-        int contador = 0;
-        int vertice_inicial;
 
         ListGraph<int,double> grafo(vertices,false);
 
@@ -38,7 +39,6 @@ void questao_um(){
         else{
             cout << "NAO" << endl;
         }
-        // testa se eh bipartido
        
     }
     
@@ -63,7 +63,7 @@ string retorna_filme(vector<Edge<string, string>>& vec, string ator){
 * 
 **/
 void questao_dois(){
-    ifstream ip("questao02.txt");
+    ifstream ip("segundaquestao.txt");
 
     if(!ip.is_open()){
         cout << "Error: File Open" << endl;
@@ -112,16 +112,27 @@ void questao_dois(){
     }
 }
 
+/**
+ * funcao criada para ler o arquivo da questao 3.
+ * identifica as pontes do grafo atraves da funcao "get_pontes"
+ * e responde a questao dando as direcoes das pontes e demais arestas do grafo.
+*/
 void questao_tres(){
     fstream file;
-    file.open("grafo2.txt");
+    file.open("terceiraquestao.txt");
+
+    if(!file.is_open()){
+        cout << "Error: File Open" << endl;
+    }
+
     int vertices;
     int arestas;
+    int contador = 0;
 
     while (file>>vertices){
         
         file >> arestas;
-        int contador = 0;
+        
         int vertice_inicial;
 
         ListGraph<int,double> grafo(vertices,false);
@@ -144,13 +155,11 @@ void questao_tres(){
         }
         
         vector<pair<int, int>> auxiliar = grafo.get_pontes(time_s, num);
-
+        cout << "Caso " << contador+1 << endl;
         grafo.converte(auxiliar);
-        cout << "As pontes do grafo testado sao:" << endl;
-        for(auto bridge : auxiliar){
-            cout << bridge.first << " - " << bridge.second << endl;
-        }
+        cout << "#" << endl;
         
+        contador++;
        
     }
     
@@ -159,11 +168,20 @@ void questao_tres(){
 
 int main() {
     
+    cout <<"--------------------" << endl
+         <<"  PRIMEIRA QUESTAO  " << endl
+         <<"--------------------" << endl;
     questao_um();
+    cout <<"--------------------" << endl
+         <<"   SEGUNDA QUESTAO  " << endl
+         <<"--------------------" << endl;
     questao_dois();
+    cout <<"--------------------" << endl
+         <<"  TERCEIRA QUESTAO  " << endl
+         <<"--------------------" << endl;
     questao_tres();
+    cout <<"--------------------" << endl;
 
-    
     
 }
 

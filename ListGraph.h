@@ -18,6 +18,12 @@ using std::queue;
 using std::map;
 using std::set;
 
+//funcao auxiliar usada na terceira questao para ordenar as arestas direcionadas
+bool comparePairs(std::pair<int, int> a, std::pair<int, int> b) {
+        return a.first < b.first;
+    }
+
+
 /**
  * Classe que especifica um TAD ListGraph que implementa um 
  * grafo como uma lista de adjacencias.
@@ -32,6 +38,116 @@ private:
     int _num_e {0};               // numero de arestas
     bool _directed;          // flag para indicar se eh direcionado
     vector<list<Edge<T, K>>> _adj;  // listas de adjacencias
+
+    /**
+     * Determina se uma aresta existe
+     * @param source O vertice de origem
+     * @param dext O vertice de destino
+     * @return true se existe uma aresta de source para dest
+    */
+    bool is_edge(T source, T dest) const{
+        int indice = 0;
+        for (int i = 0; i < _adj.size(); i++){
+            indice = i;
+            if(_adj[i].begin()->get_source() == source){
+                break;
+            }
+        }
+
+        for (auto it = _adj[indice].begin(); it != _adj[indice].end(); it++){
+            if((*it).get_source() == source && (*it).get_dest() == dest && (*it).get_weight() != numeric_limits<K>::infinity()){
+                return true;
+            }
+        }
+        return false;
+        
+    }
+
+    /**
+     * Retorna uma referencia para a lista de adjacencias de um vertice
+     * @param source O vertice origem
+     * @return Uma const reference para a lista de adjacencias de um vertice
+     * tem duas dela, uma normal e uma constante
+    */
+    list<Edge<T,K>>& neighbors(T source){
+        //procura o indice do vertice
+        int indice_do_source;
+        for(int i = 0; i < _adj.size(); i++){
+            if(source == _adj[i].begin()->get_source()){
+                indice_do_source = i;
+            }
+        }
+        //retorna a lista de adjacencias do indice encontrado, ou seja, retorna os vizinhos do vertices
+        return _adj[indice_do_source];
+    }
+
+    const list<Edge<T,K>>& neighbors(T source) const{
+        int indice_do_source;
+        for(int i = 0; i < _adj.size(); i++){
+            if(source == _adj[i].begin()->get_source()){
+                indice_do_source = i;
+            }
+        }
+        return _adj[indice_do_source];
+    }
+
+    /**
+     * funcao utilizada para a primeira questao, que faz uma busca em profundidade para dar definicao das coloracoes
+     * @param v para o vertice inicial da busca
+     * @param cores para um vetor que mantem organizacao das cores
+     * @param visitado para um vetor que mantem a organizacao de quais vertices ja foram visitados
+     * @return true ou false, a depender se a funcao encontra inconsistencias ou nao
+    */
+    bool bipartido_DFS(int v, vector<char>& cores, vector<bool>& visitado) {
+        // sinaliza o vertice recebido como resultado
+        visitado[v] = true;  
+
+        // obtem as arestas em que esse vertice faz parte como sources
+        list<Edge<T, K>>& vizinhos = neighbors(v);
+
+        // itera os vizinhos para definir as cores dos que ainda nao tiveram suas cores definidas (ou seja, ainda nao foram visitados)
+        for (auto it = vizinhos.begin(); it != vizinhos.end(); it++) {
+            int indice_do_vizinho = (*it).get_dest();
+            if (!visitado[indice_do_vizinho]) {
+                // Define a cor do vizinho com base na cor do vértice atual
+                if (cores[v] == 'v') {
+                    cores[indice_do_vizinho] = 'a';
+                } else {
+                    cores[indice_do_vizinho] = 'v';
+                }
+
+                // executa a busca em profundidade recursivamente para o vizinho
+                // se retornar falso, nao eh bipartido
+                if (!bipartido_DFS(indice_do_vizinho, cores, visitado)) {
+                    return false;  
+                }
+            // se dois vertices vizinhos possuem a mesma cor, nao eh bipartido
+            } else if (cores[indice_do_vizinho] == cores[v]) {
+                return false;  
+            }
+        }
+        return true;  // se nao houver nenhum retorno de false, significa que eh bipartido e retorna true
+    }
+
+    int Search_bridge(int s, int p, vector<std::pair<int, int>>& pontes, int& time_s, vector<int>& num){
+
+        int menor = num[s] = time_s++;
+        int filhos = 0;
+        for (Edge<T, K> i : _adj[s]){
+            if(num[i.get_dest()] == 0){
+                filhos++;
+                int m = Search_bridge(i.get_dest(), s, pontes, time_s, num);
+                menor = std::min(menor, m);
+                if(num[s] < m){
+                    pontes.push_back(std::make_pair(s, i.get_dest()));
+                }
+            }
+            else if(i.get_dest() != p){
+                menor = std::min(menor, num[i.get_dest()]);
+            }
+        }
+        return menor;
+    }
 
 public:
     /**
@@ -60,14 +176,6 @@ public:
     int get_num_e() const { return _num_e; }
 
     /**
-     * Retorna as adjacencias do grafo
-     * @return O vector contendo as adjacencias
-     */
-    vector<list<Edge<T, K>>> get_adj() const { // criei por conveniencia, achei que fosse usar, mas deixei ai
-        return _adj;
-    }
-
-    /**
      * Determina se esse eh um grafo direcionado
      * @return true se e somente se esse eh um grafo direcionado
      */
@@ -76,17 +184,20 @@ public:
     /**
      * Insere uma nova aresta no grafo
      * @param edge A nova aresta
+     * obs: insert nao considera casos de grafos direcionados, ja que as questoes nao passaram grafos direcionados
      */
     void insert(const Edge<T,K>& edge){
         bool existe_o_source = false;
         bool existe_o_dest = false;
         int inseriu = 0;
 
+        //cria uma aresta para cumprir nao direcinamento
         Edge<T, K> novo(edge.get_dest(), edge.get_source(), edge.get_weight());
 
         int indice_do_source;
         int indice_do_dest;
 
+        //se o vertice de source existe, aresta eh adicionada na sua lista no indice encontrado
         for(int i = 0; i < _adj.size(); i++){
             indice_do_source = i;
             if(edge.get_source() == _adj[i].begin()->get_source()){
@@ -99,6 +210,7 @@ public:
             }
         }
 
+        //se o vertice destino existe, a aresta inversa eh adicionada a sua lista no indice encontrado
         for(int i = 0; i < _adj.size(); i++){
             indice_do_dest = i;
             if(edge.get_dest() == _adj[i].begin()->get_source()){
@@ -111,6 +223,7 @@ public:
             }
         }
 
+        //se o vertice source nao existe, adiciona um indice no vector e adiciona a aresta na lista do novo indice
         if(existe_o_source == false){
             list<Edge<T,K>> aux;
             aux.push_back(edge);
@@ -118,111 +231,19 @@ public:
             inseriu++;
         }
 
+        //se o vertice destino nao existe, adiciona um indice no vector e adiciona a aresta inversa na lista do novo indice
         if(existe_o_dest == false){
             list<Edge<T,K>> aux;
             aux.push_back(novo);
             _adj.push_back(aux);
             inseriu++;
         }
+
+        //usa o sinalizador inseriu pra saber se alguma aresta foi adicionada e se sim, aumenta a quantidade de arestas do grafo
         if(inseriu != 0){
             this->_num_e++;
         }        
     }
-
-    /**
-     * Determina se uma aresta existe
-     * @param source O vertice de origem
-     * @param dext O vertice de destino
-     * @return true se existe uma aresta de source para dest
-    */
-    bool is_edge(T source, T dest) const{
-        int indice = 0;
-        for (int i = 0; i < _adj.size(); i++){
-            indice = i;
-            if(_adj[i].begin()->get_source() == source){
-                break;
-            }
-        }
-
-        for (auto it = _adj[indice].begin(); it != _adj[indice].end(); it++){
-            if((*it).get_source() == source && (*it).get_dest() == dest && (*it).get_weight() != numeric_limits<K>::infinity()){
-                return true;
-            }
-        }
-        return false;
-        
-    }
-
-    /** Obtem a aresta entre dois vertices
-     * @param source O vertice origem
-     * @param dest O vertice destino
-     * @return A aresta entre os dois vertices ou uma aresta
-     * com peso igual a numeric_limits<double>::infinity() se nao existe nenhuma aresta
-     */
-    //Edge<T,K> get_edge(T source, T dest) const;
-
-    /**
-     * Retorna uma referencia para a lista de adjacencias de um vertice
-     * @param source O vertice origem
-     * @return Uma const reference para a lista de adjacencias de um vertice
-    */
-    list<Edge<T,K>>& neighbors(T source){
-        int indice_do_source;
-        for(int i = 0; i < _adj.size(); i++){
-            if(source == _adj[i].begin()->get_source()){
-                indice_do_source = i;
-            }
-        }
-        
-        return _adj[indice_do_source];
-    }
-
-    const list<Edge<T,K>>& neighbors(T source) const{
-        int indice_do_source;
-        for(int i = 0; i < _adj.size(); i++){
-            if(source == _adj[i].begin()->get_source()){
-                indice_do_source = i;
-            }
-        }
-        return _adj[indice_do_source];
-    }
-
-    /*
-    ListGraph<T, K>& operator=(const ListGraph<T, K>& other) { // possivel clone nao finalizado
-        if (this == &other) {
-            return *this;
-        }
-
-        this -> _num_v = other._num_v;
-        this -> _num_e = other._num_e;
-        this -> _directed = other._directed;
-
-        
-
-        return *this;
-    }
-    */
-
-    /** 
-     * Retorna um iterator para a primeira aresta adjacent ao vertice especificado.
-     * @param source O vertice origem
-     * @return Um iterador para as arestas adjacentes a source
-    */
-    //list<Edge<T,K>>::iterator begin(T source);
-    //list<Edge<T,K>>::const_iterator begin(T source) const;
-
-    /** Retorna um iterador uma posicao apos a ultima aresta 
-     * adjacente ao vertice especificado
-     * @param source O vertice origem
-     */
-    //list<Edge<T,K>>::iterator end(T source);
-    //list<Edge<T,K>>::const_iterator end(T source) const;
-
-    // Funcoes deletadas
-    //ListGraph(const ListGraph&) = delete;
-    //ListGraph& operator=(const ListGraph&) = delete;
-
-
 
     /** Funcao que verifica se um grafo eh bipartido, o que infere que ele pode ter uma coloracao de exatamente duas cores
      * nao recebe nada como parametro pois usa atributos e funcoes da propria classe
@@ -269,44 +290,6 @@ public:
         // se a busca em profundidade nao retornou false, o grafo eh bipartido
         return true;
     }
-
-    /** Funcao necessaria para classificar um grafo como bipartido ou nao
-     * @param v O vertice a ter suas arestas analisadas
-     * @param cores uma referencia para o vector que contem a definicao das cores dos vertices de acordo com os indices
-     * @param visitado uma referencia para o vector que sinaliza se tal vertice ja foi visitado
-     * @return true caso a coloracao seja aceitavel, e false caso nao
-    */
-    bool bipartido_DFS(int v, vector<char>& cores, vector<bool>& visitado) {
-        // sinaliza o vertice recebido como resultado
-        visitado[v] = true;  
-
-        // obtem as arestas em que esse vertice faz parte como sources
-        list<Edge<T, K>>& vizinhos = neighbors(v);
-
-        // itera os vizinhos para definir as cores dos que ainda nao tiveram suas cores definidas (ou seja, ainda nao foram visitados)
-        for (auto it = vizinhos.begin(); it != vizinhos.end(); it++) {
-            int indice_do_vizinho = (*it).get_dest();
-            if (!visitado[indice_do_vizinho]) {
-                // Define a cor do vizinho com base na cor do vértice atual
-                if (cores[v] == 'v') {
-                    cores[indice_do_vizinho] = 'a';
-                } else {
-                    cores[indice_do_vizinho] = 'v';
-                }
-
-                // executa a busca em profundidade recursivamente para o vizinho
-                // se retornar falso, nao eh bipartido
-                if (!bipartido_DFS(indice_do_vizinho, cores, visitado)) {
-                    return false;  
-                }
-            // se dois vertices vizinhos possuem a mesma cor, nao eh bipartido
-            } else if (cores[indice_do_vizinho] == cores[v]) {
-                return false;  
-            }
-        }
-        return true;  // se nao houver nenhum retorno de false, significa que eh bipartido e retorna true
-    }
-
 
     /** Funcao que faz busca em largura em um grafo com vertices em string e retorna o menor caminho entre os dois vértices dados.
      * 
@@ -372,39 +355,28 @@ public:
         return numeric_limits<int>::infinity();
     }
 
-    int Search_bridge(int s, int p, vector<std::pair<int, int>>& pontes, int& time_s, vector<int>& num){
-
-        int menor = num[s] = time_s++;
-        int filhos = 0;
-        for (Edge<T, K> i : _adj[s]){
-            if(num[i.get_dest()] == 0){
-                filhos++;
-                int m = Search_bridge(i.get_dest(), s, pontes, time_s, num);
-                menor = std::min(menor, m);
-                if(num[s] < m){
-                    pontes.push_back(std::make_pair(s, i.get_dest()));
-                }
-            }
-            else if(i.get_dest() != p){
-                menor = std::min(menor, num[i.get_dest()]);
-            }
-        }
-        return menor;
-    }
-
     vector<std::pair<int, int>> get_pontes(int& time_s, vector<int>& num){
         vector<std::pair<int, int>> result;
         Search_bridge(0, -1, result, time_s, num);
         return result;
     }
 
+
+    
+    /** Funcao que vai definir quais seriam as direcoes das arestas se o grafo fosse direcionado
+     * @param pontes para as pontes identificadas no grafo
+     * printa as direcoes dadas, de forma ordenada, tratando as pontes como arestas nao direcionadas
+    */
     void converte(vector<std::pair<int, int>> pontes) {
+        //armazeno a quantidade de vertices
         int qnt_vertices = this->_num_v;
         
+        //vector para guardar os direcionamentos das arestas
         vector<std::pair<int, int>> direcoes;
 
+        //percorro todos os vertices
         for (int i = 0; i < qnt_vertices; i++) {
-
+            //estrutura de controle para percorrer e explorar os vertices e arestas do grafo
             std::stack<int> pilha;
             pilha.push(i);
 
@@ -412,12 +384,15 @@ public:
                 int v = pilha.top();
                 pilha.pop();
 
+                //obtem a lista de vizinhos do vertice atual e os explora
                 list<Edge<int, double>> vizinhos = this->neighbors(v);
+
                  for(auto it = vizinhos.begin(); it!=vizinhos.end(); it++){
                     std::pair<int,int> are((*it).get_source(),(*it).get_dest());
                     std::pair<int,int> era((*it).get_dest(),(*it).get_source());
 
-                    bool eh_ponte = false;;
+                    //verifica se a aresta atual eh uma ponte
+                    bool eh_ponte = false;
                     for(int j = 0; j < pontes.size(); j++){
                         if(pontes[j] == are){
                             eh_ponte = true;
@@ -425,13 +400,16 @@ public:
                         }
                     }
 
+                    //verifica se a aresta atual ja foi direcionada
                     bool ja_ta = false;
                     for(int j = 0; j < direcoes.size(); j++){
                         if(direcoes[j] == are || direcoes[j] == era){
                             ja_ta = true;
                         }
                     }
-
+                    
+                    //se ainda nao foi direcionada, direciona de u para v se nao for ponte, e se for, direciona de u para v
+                    // e v para u
                     if(!ja_ta){
                         if(eh_ponte){
                             direcoes.push_back(are);
@@ -447,8 +425,12 @@ public:
             }
         }
 
+        //ordena as direcoes de acordo com o primeiro item de cada arena
+        std::sort(direcoes.begin(), direcoes.end(), comparePairs);
+
+        //imprime as arestas direcionadas
         for (int i = 0; i < direcoes.size(); i++) {
-            std::cout << direcoes[i].first << " " << direcoes[i].second << std::endl;
+            std::cout << "("<<direcoes[i].first << "," << direcoes[i].second << ")" <<std::endl;
         }
     }
 
