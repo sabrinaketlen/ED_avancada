@@ -19,7 +19,7 @@ using std::map;
 using std::set;
 
 //funcao auxiliar usada na terceira questao para ordenar as arestas direcionadas
-bool comparePairs(std::pair<int, int> a, std::pair<int, int> b) {
+bool ordenar_arestas(std::pair<int, int> a, std::pair<int, int> b) {
         return a.first < b.first;
     }
 
@@ -140,7 +140,7 @@ private:
      * @param num vector para guardar quais vértices já foram visitados e com o time_s
      * @return menor tempo dos vértices visitados
     */
-    int Search_bridge(int s, int p, vector<std::pair<int, int>>& pontes, int& time_s, vector<int>& num){
+    int search_bridge(int s, int p, vector<std::pair<int, int>>& pontes, int& time_s, vector<int>& num){
 
         //a cada chamada recursiva declaro a variável "menor" e marco o num[s] para que tenha time_s incrementado
         int menor = num[s] = time_s++;
@@ -154,7 +154,7 @@ private:
         for (Edge<T, K> i : _adj[s]){
             if(num[i.get_dest()] == 0){
                 filhos++;
-                int m = Search_bridge(i.get_dest(), s, pontes, time_s, num);
+                int m = search_bridge(i.get_dest(), s, pontes, time_s, num);
                 menor = std::min(menor, m);
                 if(num[s] < m){
                     pontes.push_back(std::make_pair(s, i.get_dest()));
@@ -378,9 +378,9 @@ public:
      * @param num vector para guardar quais vértices já foram visitados
      * @return vector com todas as pontes do grafo
     */
-    vector<std::pair<int, int>> get_pontes(int& time_s, vector<int>& num){
+    vector<std::pair<int, int>> get_bridges(int& time_s, vector<int>& num){
         vector<std::pair<int, int>> result;
-        Search_bridge(0, -1, result, time_s, num);
+        search_bridge(0, -1, result, time_s, num);
         return result;
     }
 
@@ -449,7 +449,7 @@ public:
         }
 
         //ordena as direcoes de acordo com o primeiro item de cada arena
-        std::sort(direcoes.begin(), direcoes.end(), comparePairs);
+        std::sort(direcoes.begin(), direcoes.end(), ordenar_arestas);
 
         //imprime as arestas direcionadas
         for (int i = 0; i < direcoes.size(); i++) {

@@ -4,11 +4,39 @@
 #include "ListGraph.h"
 using namespace std;
 
+
+/**PROJETO 02, TRABALHO FINAL DE ESTRUTURA DE DADOS AVANCADA
+ * ALUNOS:
+ * Sabrina Ketlen Colares Santos
+ * Juliano Magalhães Jurity
+*/
+
+/**COMENTARIOS GERAIS SOBRE O CODIGO
+ * 1. Cada uma das questoes faz uma leitura de arquivo. Quando o arquivo é lido, o grafo eh testado e a resposta eh printada.
+ * 2. As leituras dos arquivos foram feitas foram da main. A main apenas chama as funcoes que le os arquivos individuais de cada
+ * questao e as responde.
+ * 3. Essas sao as funcoes criadas especificamente para cada questao:
+ * Primeira -> "questao_um", "bipartido", "bipartido_DFS";
+ * Segunda -> "questao_dois", "BFS", "retorna_filme";
+ * Terceira -> "questao_tres","get_bridges", "search_bridges", "converte".
+ * 4. Os arquivos estao identificados de acordo com a questao que os le.
+ * 5. Os arquivos contem grafos presentes nos arquivos de teste enviado pelo professor no moodle, e no caso da primeira questao
+ * contem grafos considerados casos especificos para a questao.
+ * 6. Ao executar o codigo (testamos com "g++ main.cpp -o teste.exe" e "./teste.exe") as respostas de todas as questoes serao
+ * printadas juntas, com um cabecalho sinalizando qual eh qual.
+ * 7. Se o professor quiser a resposta de uma questao por vez, basta ir na main e comentar (por "//" antes d)as funcoes que tratam
+ * das outras questoes.
+ * 8. O arquivo contem o exe usado para testar. ("./teste.exe")
+*/
+
 /**
 * funcao criada somente para ler o arquivo que sera utilizado na questao.
 * printa o resultado de cada grafo lido, de acordo com o retorno da funcao publica "bipartido"
 **/
 void questao_um(){
+     cout <<"--------------------" << endl
+          <<"  PRIMEIRA QUESTAO  " << endl
+          <<"--------------------" << endl;
 
     fstream file;
     file.open("primeiraquestao.txt");
@@ -62,6 +90,11 @@ string retorna_filme(vector<Edge<string, string>>& vec, string ator){
 * 
 **/
 void questao_dois(){
+
+    cout <<"--------------------" << endl
+         <<"   SEGUNDA QUESTAO  " << endl
+         <<"--------------------" << endl;
+
     ifstream ip("segundaquestao.txt");
 
     if(!ip.is_open()){
@@ -117,6 +150,11 @@ void questao_dois(){
  * e responde a questao dando as direcoes das pontes e demais arestas do grafo.
 */
 void questao_tres(){
+
+    cout <<"--------------------" << endl
+         <<"  TERCEIRA QUESTAO  " << endl
+         <<"--------------------" << endl;
+
     fstream file;
     file.open("terceiraquestao.txt");
 
@@ -153,7 +191,7 @@ void questao_tres(){
             num[i] = 0;
         }
         
-        vector<pair<int, int>> auxiliar = grafo.get_pontes(time_s, num);
+        vector<pair<int, int>> auxiliar = grafo.get_bridges(time_s, num);
         cout << "Caso " << contador+1 << endl;
         grafo.converte(auxiliar);
         cout << "#" << endl;
@@ -167,20 +205,9 @@ void questao_tres(){
 
 int main() {
     
-    cout <<"--------------------" << endl
-         <<"  PRIMEIRA QUESTAO  " << endl
-         <<"--------------------" << endl;
     questao_um();
-    cout <<"--------------------" << endl
-         <<"   SEGUNDA QUESTAO  " << endl
-         <<"--------------------" << endl;
     questao_dois();
-    cout <<"--------------------" << endl
-         <<"  TERCEIRA QUESTAO  " << endl
-         <<"--------------------" << endl;
     questao_tres();
-    cout <<"--------------------" << endl;
-
     
 }
 
